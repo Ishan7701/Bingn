@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BIN Generator - Educational Tool</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>BIN Generator</h1>
+            <p class="subtitle">Educational Tool for Testing Purposes</p>
+        </header>
+        
+        <div class="disclaimer">
+            <strong>⚠️ IMPORTANT DISCLAIMER:</strong> This tool is for educational and testing purposes only. 
+            Generated BINs and card details are completely fictional and should not be used for any illegal activities. 
+            Always comply with your local laws and regulations.
+        </div>
+        
+        <div class="main-content">
+            <div class="input-section">
+                <h2 class="section-title">Configuration</h2>
+                
+                <div class="form-group">
+                    <label for="bins">BIN Numbers (Separate with ;)</label>
+                    <textarea id="bins" rows="3" placeholder="515462003651; 411111; 511591">515462003651</textarea>
+                </div>
+                
+                <div class="flex-row">
+                    <div class="form-group">
+                        <label for="month">Expiration Month</label>
+                        <select id="month">
+                            <option value="01">01 - January</option>
+                            <option value="02">02 - February</option>
+                            <option value="03">03 - March</option>
+                            <option value="04">04 - April</option>
+                            <option value="05">05 - May</option>
+                            <option value="06">06 - June</option>
+                            <option value="07">07 - July</option>
+                            <option value="08">08 - August</option>
+                            <option value="09">09 - September</option>
+                            <option value="10" selected>10 - October</option>
+                            <option value="11">11 - November</option>
+                            <option value="12">12 - December</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="year">Expiration Year</label>
+                        <select id="year">
+                            <option value="2024">2024</option>
+                            <option value="2025">2025</option>
+                            <option value="2026">2026</option>
+                            <option value="2027">2027</option>
+                            <option value="2028" selected>2028</option>
+                            <option value="2029">2029</option>
+                            <option value="2030">2030</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="cvv">CVV</label>
+                    <input type="text" id="cvv" placeholder="XXX or specific CVV" value="XXX">
+                </div>
+                
+                <div class="form-group">
+                    <label for="quantity">Quantity per BIN</label>
+                    <input type="number" id="quantity" min="1" max="100" value="10">
+                </div>
+                
+                <button class="btn" id="generateBtn">🔄 Generate BINs</button>
+                
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Generating BINs...</p>
+                </div>
+            </div>
+            
+            <div class="output-section">
+                <h2 class="section-title">Generated Results</h2>
+                
+                <div class="result-area" id="result">
+                    <p>Generated BINs will appear here. Click the generate button to start.</p>
+                </div>
+                
+                <button class="copy-btn" id="copyBtn">📋 Copy All to Clipboard</button>
+                <div class="success-message" id="copySuccess">Copied to clipboard successfully!</div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>© 2025 BIN Generator | For Educational Purposes Only</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
