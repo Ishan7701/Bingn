@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced BIN Generator - All Countries</title>
+    <title>Real BIN Generator - Valid Card Data</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Arial', sans-serif;
         }
 
         body {
@@ -22,7 +22,7 @@
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(255, 255, 255, 0.98);
             padding: 30px;
             border-radius: 20px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
@@ -83,7 +83,7 @@
             font-size: 0.9rem;
         }
 
-        input, select {
+        input, select, textarea {
             padding: 12px 15px;
             border: 2px solid #e0e0e0;
             border-radius: 10px;
@@ -92,7 +92,7 @@
             background: white;
         }
 
-        input:focus, select:focus {
+        input:focus, select:focus, textarea:focus {
             border-color: #667eea;
             outline: none;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
@@ -330,18 +330,46 @@
                 font-size: 2rem;
             }
         }
+
+        .card-type-badge {
+            background: #667eea;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            display: inline-block;
+            margin-left: 10px;
+        }
+
+        .validation-status {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-left: 10px;
+        }
+
+        .valid {
+            background: #00b894;
+        }
+
+        .invalid {
+            background: #e84393;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>🌍 Advanced BIN Generator</h1>
-            <p class="subtitle">Generate Unique Cards for All Countries - No Duplicates</p>
+            <h1>💳 Real BIN Generator</h1>
+            <p class="subtitle">Generate Valid Card Data for Testing - Luhn Algorithm Verified</p>
         </header>
         
         <div class="disclaimer">
-            <strong>⚠️ EDUCATIONAL USE ONLY:</strong> This tool generates fictional test data for educational and development purposes. 
-            Generated information is completely fake and should NEVER be used for illegal activities.
+            <strong>⚠️ FOR EDUCATIONAL AND TESTING PURPOSES ONLY:</strong> 
+            This tool generates realistic but fictional card data for software testing and educational use. 
+            Generated cards are NOT real and cannot be used for actual transactions. Always comply with local laws.
         </div>
 
         <div class="control-panel">
@@ -374,15 +402,16 @@
                     <option value="mastercard">💳 Mastercard</option>
                     <option value="amex">💳 American Express</option>
                     <option value="discover">💳 Discover</option>
+                    <option value="unionpay">💳 UnionPay</option>
                 </select>
             </div>
 
             <div class="form-group">
                 <label for="quantity">Number of Cards:</label>
-                <input type="number" id="quantity" min="1" max="50" value="5">
+                <input type="number" id="quantity" min="1" max="20" value="5">
             </div>
 
-            <button class="btn generate-btn" id="generateBtn">🔄 Generate Unique Cards</button>
+            <button class="btn generate-btn" id="generateBtn">🔄 Generate Real Cards</button>
             <button class="btn clear-btn" id="clearBtn">🗑️ Clear All</button>
         </div>
 
@@ -392,8 +421,8 @@
                 <span class="stat-value" id="totalGenerated">0</span>
             </div>
             <div class="stat-item">
-                <span class="stat-label">Unique Cards:</span>
-                <span class="stat-value" id="uniqueCards">0</span>
+                <span class="stat-label">Valid Cards:</span>
+                <span class="stat-value" id="validCards">0</span>
             </div>
             <div class="stat-item">
                 <span class="stat-label">Last Country:</span>
@@ -402,10 +431,11 @@
         </div>
 
         <div class="results-section">
-            <h2>Generated Cards</h2>
+            <h2>Generated Cards <span class="card-type-badge" id="currentCardType">-</span></h2>
             <div class="result-controls">
                 <button class="btn copy-btn" id="copyAllBtn">📋 Copy All</button>
                 <button class="btn export-btn" id="exportBtn">💾 Export as CSV</button>
+                <button class="btn" id="validateAllBtn" style="background: #fdcb6e; color: white;">✓ Validate All</button>
             </div>
             <div class="result-area" id="result">
                 <div class="empty-state">
@@ -416,7 +446,7 @@
 
         <div class="loading" id="loading">
             <div class="spinner"></div>
-            <p>Generating unique cards...</p>
+            <p>Generating valid cards with real BINs...</p>
         </div>
 
         <div class="success-message" id="copySuccess">✅ Copied to clipboard successfully!</div>
@@ -424,39 +454,138 @@
     </div>
 
     <script>
-        class AdvancedBINGenerator {
+        class RealBINGenerator {
             constructor() {
                 this.generatedCards = new Set();
                 this.totalGenerated = 0;
-                this.uniqueCards = 0;
+                this.validCards = 0;
                 this.currentBatch = [];
                 
+                // Real BIN databases for different countries and card types
                 this.countryData = {
-                    'US': { name: "United States", flag: "🇺🇸", currency: "USD", bins: ['4', '51', '52', '53', '54', '55', '34', '37'], cities: ["New York", "Los Angeles", "Chicago", "Houston", "Phoenix"], states: ["NY", "CA", "IL", "TX", "AZ"], zipFormat: "#####" },
-                    'GB': { name: "United Kingdom", flag: "🇬🇧", currency: "GBP", bins: ['4', '51', '52', '53', '54', '55', '67'], cities: ["London", "Manchester", "Birmingham", "Liverpool", "Glasgow"], states: ["ENG", "SCT", "WLS", "NIR"], zipFormat: "??# #??" },
-                    'CA': { name: "Canada", flag: "🇨🇦", currency: "CAD", bins: ['4', '51', '52', '53', '54', '55'], cities: ["Toronto", "Vancouver", "Montreal", "Calgary", "Ottawa"], states: ["ON", "BC", "QC", "AB"], zipFormat: "?#? #?#" },
-                    'BD': { name: "Bangladesh", flag: "🇧🇩", currency: "BDT", bins: ['4', '51', '52', '67'], cities: ["Dhaka", "Chittagong", "Khulna", "Rajshahi", "Sylhet"], states: ["DHA", "CHI", "KHU", "RAJ"], zipFormat: "####" },
-                    'CN': { name: "China", flag: "🇨🇳", currency: "CNY", bins: ['4', '62', '81'], cities: ["Beijing", "Shanghai", "Guangzhou", "Shenzhen", "Chengdu"], states: ["BJ", "SH", "GD", "SZ"], zipFormat: "######" },
-                    'HK': { name: "Hong Kong", flag: "🇭🇰", currency: "HKD", bins: ['4', '51', '52', '53', '54', '55'], cities: ["Hong Kong", "Kowloon", "New Territories"], states: ["HK", "KL", "NT"], zipFormat: "??" },
-                    'SG': { name: "Singapore", flag: "🇸🇬", currency: "SGD", bins: ['4', '51', '52', '53', '54', '55'], cities: ["Singapore"], states: ["SG"], zipFormat: "######" },
-                    'AU': { name: "Australia", flag: "🇦🇺", currency: "AUD", bins: ['4', '51', '52', '53', '54', '55'], cities: ["Sydney", "Melbourne", "Brisbane", "Perth", "Adelaide"], states: ["NSW", "VIC", "QLD", "WA"], zipFormat: "####" },
-                    'DE': { name: "Germany", flag: "🇩🇪", currency: "EUR", bins: ['4', '51', '52', '53', '54', '55', '67'], cities: ["Berlin", "Munich", "Hamburg", "Frankfurt", "Cologne"], states: ["BE", "BY", "HH", "HE"], zipFormat: "#####" },
-                    'FR': { name: "France", flag: "🇫🇷", currency: "EUR", bins: ['4', '51', '52', '53', '54', '55'], cities: ["Paris", "Marseille", "Lyon", "Toulouse", "Nice"], states: ["IDF", "PACA", "ARA", "OCC"], zipFormat: "#####" },
-                    'JP': { name: "Japan", flag: "🇯🇵", currency: "JPY", bins: ['4', '36', '38', '39'], cities: ["Tokyo", "Osaka", "Kyoto", "Yokohama", "Nagoya"], states: ["TY", "OS", "KY", "YK"], zipFormat: "###-####" },
-                    'IN': { name: "India", flag: "🇮🇳", currency: "INR", bins: ['4', '60', '65'], cities: ["Mumbai", "Delhi", "Bangalore", "Hyderabad", "Chennai"], states: ["MH", "DL", "KA", "TS"], zipFormat: "######" },
-                    'BR': { name: "Brazil", flag: "🇧🇷", currency: "BRL", bins: ['4', '51', '52', '53', '54', '55', '60'], cities: ["São Paulo", "Rio de Janeiro", "Brasília", "Salvador", "Fortaleza"], states: ["SP", "RJ", "DF", "BA"], zipFormat: "#####-###" },
-                    'MX': { name: "Mexico", flag: "🇲🇽", currency: "MXN", bins: ['4', '51', '52', '53', '54', '55'], cities: ["Mexico City", "Guadalajara", "Monterrey", "Puebla", "Tijuana"], states: ["CDMX", "JAL", "NL", "PUE"], zipFormat: "#####" }
+                    'US': { 
+                        name: "United States", 
+                        flag: "🇺🇸", 
+                        currency: "USD",
+                        bins: {
+                            'visa': ['4539', '4556', '4916', '4532', '4929', '4024', '4486', '4716'],
+                            'mastercard': ['5123', '5523', '5423', '5252', '5519', '5178', '5533'],
+                            'amex': ['3782', '3714', '3400', '3700', '3750'],
+                            'discover': ['6011', '6500', '6521', '6522'],
+                            'unionpay': ['6200', '6240', '6260', '6282']
+                        },
+                        cities: ["New York", "Los Angeles", "Chicago", "Houston", "Phoenix", "Philadelphia", "San Antonio"],
+                        states: ["NY", "CA", "IL", "TX", "AZ", "PA", "FL", "WA"],
+                        zipFormat: "#####",
+                        addressFormat: ["Main St", "Oak Ave", "Maple Dr", "Cedar Ln", "Pine St", "Elm St", "Washington Ave"]
+                    },
+                    'GB': { 
+                        name: "United Kingdom", 
+                        flag: "🇬🇧", 
+                        currency: "GBP",
+                        bins: {
+                            'visa': ['4539', '4556', '4916', '4532'],
+                            'mastercard': ['5123', '5523', '5423', '5252'],
+                            'amex': ['3782', '3714'],
+                            'discover': ['6011', '6500'],
+                            'unionpay': ['6200', '6240']
+                        },
+                        cities: ["London", "Manchester", "Birmingham", "Liverpool", "Glasgow", "Sheffield", "Leeds"],
+                        states: ["ENG", "SCT", "WLS", "NIR"],
+                        zipFormat: "??# #??",
+                        addressFormat: ["High St", "Church Rd", "London Rd", "Park Ave", "Victoria St", "George St"]
+                    },
+                    'BD': { 
+                        name: "Bangladesh", 
+                        flag: "🇧🇩", 
+                        currency: "BDT",
+                        bins: {
+                            'visa': ['4539', '4556'],
+                            'mastercard': ['5123', '5523'],
+                            'amex': ['3782'],
+                            'discover': ['6011'],
+                            'unionpay': ['6200']
+                        },
+                        cities: ["Dhaka", "Chittagong", "Khulna", "Rajshahi", "Sylhet", "Barisal"],
+                        states: ["DHA", "CHI", "KHU", "RAJ", "SYL", "BAR"],
+                        zipFormat: "####",
+                        addressFormat: ["Gulshan Ave", "Banani Rd", "Dhanmondi Rd", "Mirpur Rd", "Uttara Ave"]
+                    },
+                    'CA': { 
+                        name: "Canada", 
+                        flag: "🇨🇦", 
+                        currency: "CAD",
+                        bins: {
+                            'visa': ['4539', '4556', '4916'],
+                            'mastercard': ['5123', '5523', '5423'],
+                            'amex': ['3782', '3714'],
+                            'discover': ['6011', '6500'],
+                            'unionpay': ['6200']
+                        },
+                        cities: ["Toronto", "Vancouver", "Montreal", "Calgary", "Ottawa", "Edmonton"],
+                        states: ["ON", "BC", "QC", "AB", "MB", "SK"],
+                        zipFormat: "?#? #?#",
+                        addressFormat: ["Main St", "King St", "Queen St", "University Ave", "Yonge St"]
+                    },
+                    'CN': { 
+                        name: "China", 
+                        flag: "🇨🇳", 
+                        currency: "CNY",
+                        bins: {
+                            'visa': ['4539', '4556'],
+                            'mastercard': ['5123', '5523'],
+                            'amex': ['3782'],
+                            'discover': ['6011'],
+                            'unionpay': ['6200', '6240', '6260', '6282']
+                        },
+                        cities: ["Beijing", "Shanghai", "Guangzhou", "Shenzhen", "Chengdu", "Chongqing"],
+                        states: ["BJ", "SH", "GD", "SZ", "SC", "CQ"],
+                        zipFormat: "######",
+                        addressFormat: ["Nanjing Rd", "Huaihai Rd", "Century Ave", "Renmin Rd", "Jiefang Rd"]
+                    }
                 };
 
                 this.cardTypeData = {
-                    'visa': { prefixes: ['4'], lengths: [16], cvvLength: 3 },
-                    'mastercard': { prefixes: ['51', '52', '53', '54', '55', '22', '23', '24', '25', '26', '27'], lengths: [16], cvvLength: 3 },
-                    'amex': { prefixes: ['34', '37'], lengths: [15], cvvLength: 4 },
-                    'discover': { prefixes: ['6011', '65', '64', '622'], lengths: [16], cvvLength: 3 }
+                    'visa': { 
+                        name: "Visa", 
+                        lengths: [16], 
+                        cvvLength: 3,
+                        pattern: /^4[0-9]{12}(?:[0-9]{3})?$/
+                    },
+                    'mastercard': { 
+                        name: "Mastercard", 
+                        lengths: [16], 
+                        cvvLength: 3,
+                        pattern: /^5[1-5][0-9]{14}$/
+                    },
+                    'amex': { 
+                        name: "American Express", 
+                        lengths: [15], 
+                        cvvLength: 4,
+                        pattern: /^3[47][0-9]{13}$/
+                    },
+                    'discover': { 
+                        name: "Discover", 
+                        lengths: [16], 
+                        cvvLength: 3,
+                        pattern: /^6(?:011|5[0-9]{2})[0-9]{12}$/
+                    },
+                    'unionpay': { 
+                        name: "UnionPay", 
+                        lengths: [16, 17, 18, 19], 
+                        cvvLength: 3,
+                        pattern: /^62[0-9]{14,17}$/
+                    }
                 };
 
-                this.firstNames = ["James", "Mary", "John", "Patricia", "Robert", "Jennifer", "Michael", "Linda", "William", "Elizabeth", "David", "Barbara", "Richard", "Susan", "Joseph", "Jessica", "Thomas", "Sarah", "Charles", "Karen"];
-                this.lastNames = ["Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez", "Hernandez", "Lopez", "Gonzalez", "Wilson", "Anderson", "Thomas", "Taylor", "Moore", "Jackson", "Martin"];
+                this.firstNames = [
+                    "James", "Mary", "John", "Patricia", "Robert", "Jennifer", 
+                    "Michael", "Linda", "William", "Elizabeth", "David", "Barbara"
+                ];
+                this.lastNames = [
+                    "Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", 
+                    "Miller", "Davis", "Rodriguez", "Martinez", "Hernandez", "Lopez"
+                ];
 
                 this.init();
             }
@@ -466,13 +595,15 @@
                 this.clearBtn = document.getElementById('clearBtn');
                 this.copyAllBtn = document.getElementById('copyAllBtn');
                 this.exportBtn = document.getElementById('exportBtn');
+                this.validateAllBtn = document.getElementById('validateAllBtn');
                 this.resultDiv = document.getElementById('result');
                 this.loadingDiv = document.getElementById('loading');
                 this.copySuccess = document.getElementById('copySuccess');
                 this.errorMessage = document.getElementById('errorMessage');
                 this.totalGeneratedSpan = document.getElementById('totalGenerated');
-                this.uniqueCardsSpan = document.getElementById('uniqueCards');
+                this.validCardsSpan = document.getElementById('validCards');
                 this.lastCountrySpan = document.getElementById('lastCountry');
+                this.currentCardTypeSpan = document.getElementById('currentCardType');
 
                 this.attachEventListeners();
             }
@@ -482,6 +613,7 @@
                 this.clearBtn.addEventListener('click', () => this.clearAll());
                 this.copyAllBtn.addEventListener('click', () => this.copyAllToClipboard());
                 this.exportBtn.addEventListener('click', () => this.exportToCSV());
+                this.validateAllBtn.addEventListener('click', () => this.validateAllCards());
             }
 
             generateCards() {
@@ -489,32 +621,39 @@
                 const cardType = document.getElementById('cardType').value;
                 const quantity = parseInt(document.getElementById('quantity').value);
 
-                if (quantity < 1 || quantity > 50) {
-                    this.showError("Please enter a quantity between 1 and 50");
+                if (quantity < 1 || quantity > 20) {
+                    this.showError("Please enter a quantity between 1 and 20");
                     return;
                 }
 
                 this.showLoading();
                 this.resultDiv.innerHTML = '';
 
+                // Update current card type display
+                const selectedCardType = cardType === 'random' ? 'Random' : this.cardTypeData[cardType].name;
+                this.currentCardTypeSpan.textContent = selectedCardType;
+
                 setTimeout(() => {
                     try {
                         const cards = [];
                         let attempts = 0;
-                        const maxAttempts = quantity * 20;
+                        const maxAttempts = quantity * 50; // Increased attempts for better uniqueness
 
                         while (cards.length < quantity && attempts < maxAttempts) {
                             const card = this.generateSingleCard(country, cardType);
                             if (card && !this.generatedCards.has(card.number)) {
-                                this.generatedCards.add(card.number);
-                                cards.push(card);
-                                this.uniqueCards++;
+                                const isValid = this.luhnCheck(card.number);
+                                if (isValid) {
+                                    this.generatedCards.add(card.number);
+                                    cards.push(card);
+                                    this.validCards++;
+                                }
                             }
                             attempts++;
                         }
 
                         if (cards.length === 0) {
-                            this.showError("Could not generate unique cards. Try generating fewer cards.");
+                            this.showError("Could not generate valid unique cards. Try generating fewer cards.");
                             this.hideLoading();
                             return;
                         }
@@ -524,14 +663,14 @@
                         this.hideLoading();
 
                         if (cards.length < quantity) {
-                            this.showError(`Generated ${cards.length} unique cards instead of ${quantity} due to uniqueness constraints.`);
+                            this.showError(`Generated ${cards.length} valid unique cards instead of ${quantity}.`);
                         }
 
                     } catch (error) {
                         this.showError("An error occurred while generating cards: " + error.message);
                         this.hideLoading();
                     }
-                }, 500);
+                }, 800);
             }
 
             generateSingleCard(country, cardType) {
@@ -543,12 +682,19 @@
                 
                 if (!countryInfo || !cardTypeInfo) return null;
 
-                const bin = this.generateBIN(selectedCountry, selectedCardType);
+                // Get appropriate BIN for country and card type
+                const bin = this.getBINForCountry(selectedCountry, selectedCardType);
                 if (!bin) return null;
 
+                // Generate complete card number
                 const cardNumber = this.generateCardNumber(bin, cardTypeInfo.lengths[0]);
+                
+                // Validate with Luhn algorithm
+                if (!this.luhnCheck(cardNumber)) return null;
+
+                // Generate other details
                 const expiry = this.generateExpiryDate();
-                const cvv = this.generateRandomNumber(cardTypeInfo.cvvLength);
+                const cvv = this.generateCVV(cardTypeInfo.cvvLength);
                 const cardholder = this.generateCardholderName();
                 const address = this.generateAddress(selectedCountry, countryInfo);
 
@@ -562,45 +708,54 @@
                     countryName: countryInfo.name,
                     flag: countryInfo.flag,
                     currency: countryInfo.currency,
-                    cardType: selectedCardType.toUpperCase(),
-                    ...address
+                    cardType: selectedCardType,
+                    cardTypeName: cardTypeInfo.name,
+                    ...address,
+                    valid: true
                 };
             }
 
-            generateBIN(countryCode, cardType) {
+            getBINForCountry(countryCode, cardType) {
                 const countryInfo = this.countryData[countryCode];
-                const cardTypeInfo = this.cardTypeData[cardType];
+                if (!countryInfo || !countryInfo.bins[cardType]) return null;
                 
-                if (!countryInfo || !cardTypeInfo) return null;
-
-                const commonPrefixes = countryInfo.bins.filter(prefix => 
-                    cardTypeInfo.prefixes.some(cardPrefix => prefix.startsWith(cardPrefix) || cardPrefix.startsWith(prefix))
-                );
-
-                let prefix;
-                if (commonPrefixes.length > 0) {
-                    prefix = commonPrefixes[Math.floor(Math.random() * commonPrefixes.length)];
-                } else {
-                    prefix = cardTypeInfo.prefixes[Math.floor(Math.random() * cardTypeInfo.prefixes.length)];
-                }
-
-                const remainingLength = 6 - prefix.length;
-                if (remainingLength > 0) {
-                    return prefix + this.generateRandomNumber(remainingLength);
-                }
-                return prefix;
+                const bins = countryInfo.bins[cardType];
+                return bins[Math.floor(Math.random() * bins.length)];
             }
 
             generateCardNumber(bin, length) {
                 let cardNumber = bin;
-                const remainingLength = length - bin.length - 1;
+                const remainingLength = length - bin.length - 1; // -1 for check digit
                 
+                // Generate random digits
                 for (let i = 0; i < remainingLength; i++) {
                     cardNumber += Math.floor(Math.random() * 10);
                 }
 
+                // Calculate and add Luhn check digit
                 const checkDigit = this.calculateLuhnCheckDigit(cardNumber);
                 return cardNumber + checkDigit;
+            }
+
+            luhnCheck(cardNumber) {
+                let sum = 0;
+                let isEven = false;
+
+                for (let i = cardNumber.length - 1; i >= 0; i--) {
+                    let digit = parseInt(cardNumber.charAt(i));
+
+                    if (isEven) {
+                        digit *= 2;
+                        if (digit > 9) {
+                            digit -= 9;
+                        }
+                    }
+
+                    sum += digit;
+                    isEven = !isEven;
+                }
+
+                return sum % 10 === 0;
             }
 
             calculateLuhnCheckDigit(number) {
@@ -625,12 +780,13 @@
             }
 
             generateExpiryDate() {
+                const currentYear = new Date().getFullYear();
                 const month = String(Math.floor(Math.random() * 12) + 1).padStart(2, '0');
-                const year = String(new Date().getFullYear() + Math.floor(Math.random() * 5) + 1);
+                const year = String(currentYear + Math.floor(Math.random() * 3) + 1); // 1-3 years from now
                 return { month, year: year.slice(2) };
             }
 
-            generateRandomNumber(length) {
+            generateCVV(length) {
                 let result = '';
                 for (let i = 0; i < length; i++) {
                     result += Math.floor(Math.random() * 10);
@@ -648,13 +804,11 @@
                 const city = countryInfo.cities[Math.floor(Math.random() * countryInfo.cities.length)];
                 const state = countryInfo.states[Math.floor(Math.random() * countryInfo.states.length)];
                 const zipCode = this.generateZipCode(countryInfo.zipFormat);
-
-                const streetNumbers = ['123', '456', '789', '100', '200', '300'];
-                const streetNames = ['Main St', 'Oak Ave', 'Maple Dr', 'Cedar Ln', 'Pine St', 'Elm St'];
-                const street = `${streetNumbers[Math.floor(Math.random() * streetNumbers.length)]} ${streetNames[Math.floor(Math.random() * streetNames.length)]}`;
+                const streetNumber = Math.floor(Math.random() * 999) + 1;
+                const streetName = countryInfo.addressFormat[Math.floor(Math.random() * countryInfo.addressFormat.length)];
 
                 return {
-                    street: street,
+                    street: `${streetNumber} ${streetName}`,
                     city: city,
                     state: state,
                     zipCode: zipCode
@@ -687,6 +841,7 @@
 
             displayCards(cards) {
                 this.totalGenerated += cards.length;
+                this.currentBatch = cards;
                 
                 cards.forEach(card => {
                     const cardElement = this.createCardElement(card);
@@ -699,18 +854,23 @@
             createCardElement(card) {
                 const cardDiv = document.createElement('div');
                 cardDiv.className = 'card-item';
+                cardDiv.setAttribute('data-card-number', card.number);
+                
+                const isValid = this.luhnCheck(card.number);
+                const validationClass = isValid ? 'valid' : 'invalid';
                 
                 cardDiv.innerHTML = `
-                    <div class="card-number">${card.formattedNumber}</div>
+                    <div class="card-number">
+                        ${card.formattedNumber}
+                        <span class="validation-status ${validationClass}" title="${isValid ? 'Valid Card' : 'Invalid Card'}"></span>
+                        <span class="card-type-badge">${card.cardTypeName}</span>
+                    </div>
                     <div class="card-details">
                         <div class="detail-item">
                             <strong>Expiry:</strong> ${card.expiry}
                         </div>
                         <div class="detail-item">
                             <strong>CVV:</strong> ${card.cvv}
-                        </div>
-                        <div class="detail-item">
-                            <strong>Type:</strong> ${card.cardType}
                         </div>
                         <div class="detail-item">
                             <span class="country-flag">${card.flag}</span>
@@ -732,37 +892,67 @@
             }
 
             formatCardNumber(number) {
-                return number.replace(/(\d{4})/g, '$1 ').trim();
+                if (number.length === 15) { // Amex format
+                    return number.replace(/(\d{4})(\d{6})(\d{5})/, '$1 $2 $3');
+                } else { // Standard format
+                    return number.replace(/(\d{4})/g, '$1 ').trim();
+                }
             }
 
             updateStats(lastCountry) {
                 this.totalGeneratedSpan.textContent = this.totalGenerated;
-                this.uniqueCardsSpan.textContent = this.uniqueCards;
+                this.validCardsSpan.textContent = this.validCards;
                 this.lastCountrySpan.textContent = this.countryData[lastCountry]?.name || lastCountry;
+            }
+
+            validateAllCards() {
+                const cardElements = this.resultDiv.querySelectorAll('.card-item');
+                let validCount = 0;
+                let totalCount = cardElements.length;
+
+                cardElements.forEach(cardElement => {
+                    const cardNumber = cardElement.getAttribute('data-card-number');
+                    const isValid = this.luhnCheck(cardNumber);
+                    const statusElement = cardElement.querySelector('.validation-status');
+                    
+                    statusElement.className = `validation-status ${isValid ? 'valid' : 'invalid'}`;
+                    statusElement.title = isValid ? 'Valid Card' : 'Invalid Card';
+                    
+                    if (isValid) validCount++;
+                });
+
+                this.showSuccess(`Validation complete: ${validCount}/${totalCount} cards are valid`);
             }
 
             clearAll() {
                 this.generatedCards.clear();
                 this.totalGenerated = 0;
-                this.uniqueCards = 0;
+                this.validCards = 0;
                 this.currentBatch = [];
                 this.resultDiv.innerHTML = '<div class="empty-state"><p>No cards generated yet. Click the generate button to start.</p></div>';
                 this.updateStats('-');
+                this.currentCardTypeSpan.textContent = '-';
                 this.hideMessages();
             }
 
             async copyAllToClipboard() {
-                const cards = Array.from(this.resultDiv.querySelectorAll('.card-item'));
-                if (cards.length === 0) {
+                if (this.currentBatch.length === 0) {
                     this.showError("No cards to copy");
                     return;
                 }
 
-                let textToCopy = "Generated BIN Cards\n\n";
-                cards.forEach((card, index) => {
-                    const number = card.querySelector('.card-number').textContent;
-                    const details = card.querySelector('.card-details').textContent;
-                    textToCopy += `Card ${index + 1}:\n${number}\n${details}\n\n`;
+                let textToCopy = "Generated Valid Card Data\n\n";
+                this.currentBatch.forEach((card, index) => {
+                    textToCopy += `Card ${index + 1}:\n`;
+                    textToCopy += `Number: ${card.formattedNumber}\n`;
+                    textToCopy += `Expiry: ${card.expiry}\n`;
+                    textToCopy += `CVV: ${card.cvv}\n`;
+                    textToCopy += `Cardholder: ${card.cardholder}\n`;
+                    textToCopy += `Type: ${card.cardTypeName}\n`;
+                    textToCopy += `Country: ${card.countryName} ${card.flag}\n`;
+                    textToCopy += `Currency: ${card.currency}\n`;
+                    textToCopy += `Address: ${card.street}, ${card.city}, ${card.state} ${card.zipCode}\n`;
+                    textToCopy += `Valid: ${this.luhnCheck(card.number) ? 'Yes' : 'No'}\n\n`;
                 });
 
                 try {
@@ -774,39 +964,27 @@
             }
 
             exportToCSV() {
-                const cards = Array.from(this.resultDiv.querySelectorAll('.card-item'));
-                if (cards.length === 0) {
+                if (this.currentBatch.length === 0) {
                     this.showError("No cards to export");
                     return;
                 }
 
-                let csvContent = "Card Number,Expiry,CVV,Type,Country,Currency,Cardholder,Address\n";
+                let csvContent = "Card Number,Formatted Number,Expiry,CVV,Cardholder,Type,Country,Currency,Street,City,State,Zip Code,Valid\n";
                 
-                cards.forEach(card => {
-                    const number = card.querySelector('.card-number').textContent.replace(/\s/g, '');
-                    const details = card.querySelector('.card-details').textContent;
-                    const lines = details.split('\n').filter(line => line.trim());
-                    
-                    const expiry = lines[0].split(':')[1]?.trim() || '';
-                    const cvv = lines[1].split(':')[1]?.trim() || '';
-                    const type = lines[2].split(':')[1]?.trim() || '';
-                    const country = lines[3].split(':')[1]?.trim() || '';
-                    const currency = lines[4].split(':')[1]?.trim() || '';
-                    const cardholder = lines[5].split(':')[1]?.trim() || '';
-                    const address = lines[6].split(':')[1]?.trim() || '';
-
-                    csvContent += `"${number}","${expiry}","${cvv}","${type}","${country}","${currency}","${cardholder}","${address}"\n`;
+                this.currentBatch.forEach(card => {
+                    const isValid = this.luhnCheck(card.number);
+                    csvContent += `"${card.number}","${card.formattedNumber}","${card.expiry}","${card.cvv}","${card.cardholder}","${card.cardTypeName}","${card.countryName}","${card.currency}","${card.street}","${card.city}","${card.state}","${card.zipCode}","${isValid ? 'Yes' : 'No'}"\n`;
                 });
 
                 const blob = new Blob([csvContent], { type: 'text/csv' });
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `bin_cards_${new Date().getTime()}.csv`;
+                a.download = `valid_cards_${new Date().getTime()}.csv`;
                 a.click();
                 window.URL.revokeObjectURL(url);
                 
-                this.showSuccess("Cards exported successfully!");
+                this.showSuccess("Cards exported to CSV successfully!");
             }
 
             showLoading() {
@@ -818,7 +996,7 @@
             hideLoading() {
                 this.loadingDiv.style.display = 'none';
                 this.generateBtn.disabled = false;
-                this.generateBtn.textContent = '🔄 Generate Unique Cards';
+                this.generateBtn.textContent = '🔄 Generate Real Cards';
             }
 
             showSuccess(message) {
@@ -845,7 +1023,7 @@
 
         // Initialize the application when DOM is loaded
         document.addEventListener('DOMContentLoaded', () => {
-            new AdvancedBINGenerator();
+            new RealBINGenerator();
         });
     </script>
 </body>
