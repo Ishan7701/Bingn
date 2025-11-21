@@ -3,97 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BIN Generator - Educational Tool</title>
+    <title>Advanced BIN Generator - Unique Cards Only</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>BIN Generator</h1>
-            <p class="subtitle">Educational Tool for Testing Purposes</p>
+            <h1>🌍 Advanced BIN Generator</h1>
+            <p class="subtitle">Generate Unique Cards for All Countries - No Duplicates</p>
         </header>
         
         <div class="disclaimer">
-            <strong>⚠️ IMPORTANT DISCLAIMER:</strong> This tool is for educational and testing purposes only. 
-            Generated BINs and card details are completely fictional and should not be used for any illegal activities. 
-            Always comply with your local laws and regulations.
+            <strong>⚠️ EDUCATIONAL USE ONLY:</strong> This tool generates fictional test data for educational and development purposes. 
+            Generated information is completely fake and should NEVER be used for illegal activities.
         </div>
-        
-        <div class="main-content">
-            <div class="input-section">
-                <h2 class="section-title">Configuration</h2>
-                
-                <div class="form-group">
-                    <label for="bins">BIN Numbers (Separate with ;)</label>
-                    <textarea id="bins" rows="3" placeholder="515462003651; 411111; 511591">515462003651</textarea>
-                </div>
-                
-                <div class="flex-row">
-                    <div class="form-group">
-                        <label for="month">Expiration Month</label>
-                        <select id="month">
-                            <option value="01">01 - January</option>
-                            <option value="02">02 - February</option>
-                            <option value="03">03 - March</option>
-                            <option value="04">04 - April</option>
-                            <option value="05">05 - May</option>
-                            <option value="06">06 - June</option>
-                            <option value="07">07 - July</option>
-                            <option value="08">08 - August</option>
-                            <option value="09">09 - September</option>
-                            <option value="10" selected>10 - October</option>
-                            <option value="11">11 - November</option>
-                            <option value="12">12 - December</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="year">Expiration Year</label>
-                        <select id="year">
-                            <option value="2024">2024</option>
-                            <option value="2025">2025</option>
-                            <option value="2026">2026</option>
-                            <option value="2027">2027</option>
-                            <option value="2028" selected>2028</option>
-                            <option value="2029">2029</option>
-                            <option value="2030">2030</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="cvv">CVV</label>
-                    <input type="text" id="cvv" placeholder="XXX or specific CVV" value="XXX">
-                </div>
-                
-                <div class="form-group">
-                    <label for="quantity">Quantity per BIN</label>
-                    <input type="number" id="quantity" min="1" max="100" value="10">
-                </div>
-                
-                <button class="btn" id="generateBtn">🔄 Generate BINs</button>
-                
-                <div class="loading" id="loading">
-                    <div class="spinner"></div>
-                    <p>Generating BINs...</p>
-                </div>
+
+        <div class="control-panel">
+            <div class="form-group">
+                <label for="country">Select Country:</label>
+                <select id="country">
+                    <option value="random">🌎 Random Country</option>
+                    <option value="US">🇺🇸 United States</option>
+                    <option value="GB">🇬🇧 United Kingdom</option>
+                    <option value="CA">🇨🇦 Canada</option>
+                    <option value="BD">🇧🇩 Bangladesh</option>
+                    <option value="CN">🇨🇳 China</option>
+                    <option value="HK">🇭🇰 Hong Kong</option>
+                    <option value="SG">🇸🇬 Singapore</option>
+                    <option value="AU">🇦🇺 Australia</option>
+                    <option value="DE">🇩🇪 Germany</option>
+                    <option value="FR">🇫🇷 France</option>
+                    <option value="JP">🇯🇵 Japan</option>
+                    <option value="IN">🇮🇳 India</option>
+                    <option value="BR">🇧🇷 Brazil</option>
+                    <option value="MX">🇲🇽 Mexico</option>
+                </select>
             </div>
-            
-            <div class="output-section">
-                <h2 class="section-title">Generated Results</h2>
-                
-                <div class="result-area" id="result">
-                    <p>Generated BINs will appear here. Click the generate button to start.</p>
-                </div>
-                
-                <button class="copy-btn" id="copyBtn">📋 Copy All to Clipboard</button>
-                <div class="success-message" id="copySuccess">Copied to clipboard successfully!</div>
+
+            <div class="form-group">
+                <label for="cardType">Card Type:</label>
+                <select id="cardType">
+                    <option value="random">🎲 Random Type</option>
+                    <option value="visa">💳 Visa</option>
+                    <option value="mastercard">💳 Mastercard</option>
+                    <option value="amex">💳 American Express</option>
+                    <option value="discover">💳 Discover</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="quantity">Number of Cards:</label>
+                <input type="number" id="quantity" min="1" max="50" value="5">
+            </div>
+
+            <button class="btn generate-btn" id="generateBtn">🔄 Generate Unique Cards</button>
+            <button class="btn clear-btn" id="clearBtn">🗑️ Clear All</button>
+        </div>
+
+        <div class="stats">
+            <div class="stat-item">
+                <span class="stat-label">Total Generated:</span>
+                <span class="stat-value" id="totalGenerated">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Unique Cards:</span>
+                <span class="stat-value" id="uniqueCards">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Last Country:</span>
+                <span class="stat-value" id="lastCountry">-</span>
             </div>
         </div>
-        
-        <div class="footer">
-            <p>© 2025 BIN Generator | For Educational Purposes Only</p>
+
+        <div class="results-section">
+            <h2>Generated Cards</h2>
+            <div class="result-controls">
+                <button class="btn copy-btn" id="copyAllBtn">📋 Copy All</button>
+                <button class="btn export-btn" id="exportBtn">💾 Export as CSV</button>
+            </div>
+            <div class="result-area" id="result">
+                <div class="empty-state">
+                    <p>No cards generated yet. Click the generate button to start.</p>
+                </div>
+            </div>
         </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Generating unique cards...</p>
+        </div>
+
+        <div class="success-message" id="copySuccess">✅ Copied to clipboard successfully!</div>
+        <div class="error-message" id="errorMessage"></div>
     </div>
 
     <script src="script.js"></script>
